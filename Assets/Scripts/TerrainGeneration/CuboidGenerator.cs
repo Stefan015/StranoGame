@@ -7,10 +7,8 @@ public class CuboidGenerator
     public static GameObject GenerateCuboid(Vector3 vector,GameObject parent,Vector2 cubeSizeRange, int seed, int maxGridSize) {
         
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube); // create cube
-
-        Texture texture = Resources.Load<Texture>("TestTexture"); // path inside Asset folder
-        Material material = Resources.Load<Material>("TestMaterial1");
-        material.mainTexture = texture;
+        
+        Material material = Resources.Load<Material>("Material/CuboidMaterial");
 
         Renderer renderer = cube.GetComponent<Renderer>();
         renderer.material = material;

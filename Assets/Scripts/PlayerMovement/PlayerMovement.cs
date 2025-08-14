@@ -77,9 +77,9 @@ public class PlayerMovement : MonoBehaviour
 
         if (grounded)
         {
-            rb.drag = groundedDrag;
+            rb.linearDamping = groundedDrag;
 
-        }else rb.drag = 0;
+        }else rb.linearDamping = 0;
     }
 
     private void input() {
@@ -138,18 +138,18 @@ public class PlayerMovement : MonoBehaviour
 
     }
     private void speedControl() {
-        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         if(flatVel.magnitude > movementSpeed) {
             Vector3 limitedVel = flatVel.normalized * movementSpeed;
 
-            rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
+            rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
 
         }
     }
 
     private void jump() {
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
 
