@@ -5,8 +5,9 @@ Shader "Tutorial/VolumetricFog"
         _Color("Color", Color) = (1, 1, 1, 1)
         _ZFar("Camera Far", Float) = 50000
         _MaxDistance("Max distance", Float) = 100
+        _Exponent("Exponent", Range(0,5)) = 2
         _StepSize("Step size", Range(0.1, 20)) = 1
-        _DensityMultiplier("Density Multiplier", Range(0,10)) = 1
+        _DensityMultiplier("Density Multiplier", Range(0,1)) = 0.01
         _NoiseOffset("Noise offset", float) = 0
         _LightContribution("light contribution", Color) = (1,1,1,1)
 //       _LightScattering("Light scattering", Range (-1000,1000)) = 5
@@ -36,6 +37,7 @@ Shader "Tutorial/VolumetricFog"
             float _zNear;
             float _ZFar;
             float _NoiseOffset;
+            float _Exponent;
             float4 _LightContribution;
             // float4 _LightScattering;
 
@@ -56,9 +58,9 @@ Shader "Tutorial/VolumetricFog"
 
                 float rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture,sampler_CameraDepthTexture,IN.texcoord);
                 float linearDepth = Linear01Depth(rawDepth,_ZBufferParams);
-                float logDepth = log(linearDepth *_ZFar + 1.0) / log(_ZFar + 1.0);
+                float logDepth = pow(1 - log(linearDepth * _ZFar + 1.0) / log(_ZFar + 1.0),_Exponent);
 
-                float3 worldPos = ComputeWorldSpacePosition(IN.texcoord,1-logDepth,UNITY_MATRIX_I_VP);
+                float3 worldPos = ComputeWorldSpacePosition(IN.texcoord,logDepth,UNITY_MATRIX_I_VP);
                 // float3 worldPos = ComputeWorldSpacePosition(IN.texcoord,depth,UNITY_MATRIX_I_VP);
 
                 float3 entryPoint = _WorldSpaceCameraPos;

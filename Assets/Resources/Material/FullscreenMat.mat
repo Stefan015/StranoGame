@@ -43,8 +43,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DensityMultiplier: 0.6
+    - _DensityMultiplier: 0.04
     - _DensityThreshold: 1
+    - _Exponent: 2.27
     - _LightScattering: 1000
     - _MaxDistance: 100
     - _NoiseOffset: 0.2
@@ -54,9 +55,9 @@ Material:
     - _ZFar: 100000
     - _ZNear: 0.3
     m_Colors:
-    - _Color: {r: 0, g: 0, b: 0, a: 1}
+    - _Color: {r: 0.029962776, g: 0, b: 0.46226418, a: 1}
     - _Color1: {r: 0, g: 0, b: 0, a: 1}
     - _Color2: {r: 1, g: 1, b: 1, a: 1}
-    - _LightContribution: {r: 0.8773585, g: 0.64231956, b: 0.3517711, a: 1}
+    - _LightContribution: {r: 0.6509434, g: 0.35246834, b: 0, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
