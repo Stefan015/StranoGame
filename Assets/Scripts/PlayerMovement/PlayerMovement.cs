@@ -1,13 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
-{
+public class PlayerMovement : MonoBehaviour{
 
     [Header("Movement")]
-    private float movementSpeed;
+    private float _movementSpeed;
     public float walkSpeed;
     public float sprintSpeed;
 
@@ -17,12 +13,12 @@ public class PlayerMovement : MonoBehaviour
     public float jumpForce;
     public float jumpCooldown;
     public float airMultiplier;
-    bool readyToJump;
+    private bool _readyToJump;
 
     [Header("Crouching")]
     public float crouchSpeed;
     public float crouchYscale;
-    private float startYscale;
+    private float _startYscale;
 
     [Header("KeyBinds")]
     public KeyCode jumpKey = KeyCode.Space;
@@ -33,128 +29,126 @@ public class PlayerMovement : MonoBehaviour
     [Header("Ground Check")]
     public float playerHeight;
     public LayerMask whatIsGround;
-    bool grounded;
+    private bool _grounded;
 
-   
+
 
     public Transform orientation;
 
-    float horizontalInput;
-    float verticalInput;
+    private float _horizontalInput;
+    private float _verticalInput;
 
-    Vector3 moveDirection;
+    private Vector3 _moveDirection;
 
-    Rigidbody rb;
+    private Rigidbody _rb;
 
     public MovementState state;
 
-    public enum MovementState {
-        walking,
-        sprinting,
-        air,
-        crouching
+    public enum MovementState{
+        Walking,
+        Sprinting,
+        Air,
+        Crouching
     }
 
-    private void FixedUpdate() {
-        move();
+    private void FixedUpdate(){
+        Move();
     }
-    private void Start() {
+    private void Start(){
         ResetJump();
 
-        rb = GetComponent<Rigidbody>(); 
-        rb.freezeRotation = true;
+        _rb = GetComponent<Rigidbody>();
+        _rb.freezeRotation = true;
 
-        startYscale = transform.localScale.y;
+        _startYscale = transform.localScale.y;
     }
-    private void Update() {
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
+    private void Update(){
+        _grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
 
-        input();
+        HandleInput();
 
-        speedControl();
+        SpeedControl();
 
-        stateHandler();
+        StateHandler();
 
-        if (grounded)
-        {
-            rb.linearDamping = groundedDrag;
-
-        }else rb.linearDamping = 0;
+        if (_grounded){
+            _rb.linearDamping = groundedDrag;
+        }
+        else _rb.linearDamping = 0;
     }
 
-    private void input() {
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
+    private void HandleInput(){
+        _horizontalInput = Input.GetAxisRaw("Horizontal");
+        _verticalInput = Input.GetAxisRaw("Vertical");
 
-        if(Input.GetKey(jumpKey) && readyToJump && grounded) {
-            readyToJump = false;
+        if (Input.GetKey(jumpKey) && _readyToJump && _grounded){
+            _readyToJump = false;
 
-            jump();
+            Jump();
 
             Invoke(nameof(ResetJump), jumpCooldown);
         }
 
-        if (Input.GetKeyDown(crouchKey)) {
+        if (Input.GetKeyDown(crouchKey)){
             transform.localScale = new Vector3(transform.localScale.x, crouchYscale, transform.localScale.z);
 
             playerHeight *= 0.5f;
 
-            rb.AddForce(Vector3.down* 5f, ForceMode.Impulse);
+            _rb.AddForce(Vector3.down * 5f, ForceMode.Impulse);
         }
 
-        if (Input.GetKeyUp(crouchKey)) {
-            transform.localScale = new Vector3(transform.localScale.x, startYscale, transform.localScale.z);
+        if (Input.GetKeyUp(crouchKey)){
+            transform.localScale = new Vector3(transform.localScale.x, _startYscale, transform.localScale.z);
 
             playerHeight *= 2f;
         }
     }
-    public void stateHandler() {
-     
+    public void StateHandler(){
 
-        if (grounded && Input.GetKey(sprintKey)) {
-            state = MovementState.sprinting;
-            movementSpeed = sprintSpeed;
+        if (_grounded && Input.GetKey(sprintKey)){
+            state = MovementState.Sprinting;
+            _movementSpeed = sprintSpeed;
         }
-        else if (Input.GetKey(crouchKey)) {
-            state = MovementState.crouching;
-            movementSpeed = crouchSpeed;
+        else if (Input.GetKey(crouchKey)){
+            state = MovementState.Crouching;
+            _movementSpeed = crouchSpeed;
         }
-        else if (grounded) {
-            state = MovementState.walking;
-            movementSpeed = walkSpeed;
+        else if (_grounded){
+            state = MovementState.Walking;
+            _movementSpeed = walkSpeed;
         }
-        else {
-             state = MovementState.air; 
-        }
-    }
-    private void move() {
-        moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
-
-        if(grounded)
-            rb.AddForce(moveDirection.normalized * movementSpeed * 10f,ForceMode.Force);
-        
-        else if(!grounded)
-            rb.AddForce(moveDirection.normalized * movementSpeed * airMultiplier * 10f, ForceMode.Force);
-
-    }
-    private void speedControl() {
-        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-
-        if(flatVel.magnitude > movementSpeed) {
-            Vector3 limitedVel = flatVel.normalized * movementSpeed;
-
-            rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
-
+        else{
+            state = MovementState.Air;
         }
     }
+    private void Move(){
+        _moveDirection = orientation.forward * _verticalInput + orientation.right * _horizontalInput;
 
-    private void jump() {
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        if (_grounded)
+            _rb.AddForce(_moveDirection.normalized * _movementSpeed * 10f, ForceMode.Force);
 
-        rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        else if (!_grounded)
+            _rb.AddForce(_moveDirection.normalized * _movementSpeed * airMultiplier * 10f, ForceMode.Force);
 
     }
-    private void ResetJump() {
-        readyToJump = true;
+    private void SpeedControl(){
+        Vector3 flatVel = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+
+        if (flatVel.magnitude > _movementSpeed){
+            Vector3 limitedVel = flatVel.normalized * _movementSpeed;
+
+            _rb.linearVelocity = new Vector3(limitedVel.x, _rb.linearVelocity.y, limitedVel.z);
+
+        }
+    }
+
+    private void Jump(){
+        _rb.linearVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+
+        _rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+
+    }
+    private void ResetJump(){
+        _readyToJump = true;
     }
 }

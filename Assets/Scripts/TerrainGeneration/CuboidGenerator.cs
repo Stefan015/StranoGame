@@ -1,37 +1,34 @@
 using UnityEngine;
 
-public class CuboidGenerator
-{
+public class CuboidGenerator{
+
+    private static FastNoiseLite _cachedNoise;
+
+    private static FastNoiseLite GetNoiseGenerator(int seed){
+        if (_cachedNoise == null){
+            _cachedNoise = new FastNoiseLite();
+            _cachedNoise.SetNoiseType(FastNoiseLite.NoiseType.ValueCubic);
+            _cachedNoise.SetSeed(seed);
+        }
+        return _cachedNoise;
+    }
 
     // creates a cuboid and returns a refrence to it
-    public static GameObject GenerateCuboid(Vector3 vector,GameObject parent,Vector2 cubeSizeRange, int seed, int maxGridSize) {
-        
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube); // create cube
-        
-        Material material = Resources.Load<Material>("Material/CuboidMaterial");
+    public static GameObject GenerateCuboid(Vector3 positionOfCube,GameObject parent,Vector2 cubeSizeRange, int seed, GameObject cubePrefab){
 
-        Renderer renderer = cube.GetComponent<Renderer>();
-        renderer.material = material;
-
-        Vector3 cords = GenerateCords(seed,vector,maxGridSize, cubeSizeRange);
-
-        cube.transform.position = vector;
-        cube.transform.localScale = new  Vector3(cords.x, cords.y, cords.z);
-        cube.transform.parent = parent.transform;
+        GameObject cube = GameObject.Instantiate(cubePrefab, positionOfCube, Quaternion.identity, parent.transform);
+        Vector3 cords = GenerateCords(seed, positionOfCube, cubeSizeRange);
+        cube.transform.localScale = new Vector3(cords.x, cords.y, cords.z);
         cube.layer = parent.layer;
 
         return cube;
     }
 
-    //Generates noise values and from them extracts length, width and height of object
-    private static Vector3 GenerateCords(int seed,Vector3 cubePos,int maxGridSize, Vector2 cubeSizeRange) {
+    //Generates _cachedNoise values and from them extracts length, width and height of object
+    private static Vector3 GenerateCords(int seed,Vector3 cubePos, Vector2 cubeSizeRange){
         Vector3 result = Vector3.zero;
-        
-        FastNoiseLite noise = new FastNoiseLite();
-        noise.SetNoiseType(FastNoiseLite.NoiseType.ValueCubic);
-        noise.SetSeed(seed);
 
-        float noiseValue = (noise.GetNoise(cubePos.x,cubePos.y,cubePos.z) + 1) * 0.5f;
+        float noiseValue = (GetNoiseGenerator(seed).GetNoise(cubePos.x,cubePos.y,cubePos.z) + 1) * 0.5f;
 
         result.x = noiseValue;
         result.y = ((noiseValue * 1000) % 10)/10;

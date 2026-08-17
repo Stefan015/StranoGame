@@ -1,4 +1,4 @@
-Shader "Tutorial/VolumetricFog"
+Shader "Fullscreen/VolumetricFog"
 {
     Properties
     {
@@ -10,7 +10,6 @@ Shader "Tutorial/VolumetricFog"
         _DensityMultiplier("Density Multiplier", Range(0,1)) = 0.01
         _NoiseOffset("Noise offset", float) = 0
         _LightContribution("light contribution", Color) = (1,1,1,1)
-//       _LightScattering("Light scattering", Range (-1000,1000)) = 5
         
     }
 
@@ -39,29 +38,21 @@ Shader "Tutorial/VolumetricFog"
             float _NoiseOffset;
             float _Exponent;
             float4 _LightContribution;
-            // float4 _LightScattering;
 
             float get_density()
             {
                 return _DensityMultiplier;
             }
-            // float henyey_greenstein(float angle, float scattering)
-            // {
-            //     return (1.0 - angle * angle) / (4.0 * PI * pow(1.0 + scattering * scattering - (2.0 * scattering) * angle, 1.5f));
-            // }
             
             half4 frag(Varyings IN) : SV_Target
             {
                 float col =  SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearClamp,IN.texcoord);
-
-                // float depth = SampleSceneDepth(IN.texcoord);
 
                 float rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture,sampler_CameraDepthTexture,IN.texcoord);
                 float linearDepth = Linear01Depth(rawDepth,_ZBufferParams);
                 float logDepth = pow(1 - log(linearDepth * _ZFar + 1.0) / log(_ZFar + 1.0),_Exponent);
 
                 float3 worldPos = ComputeWorldSpacePosition(IN.texcoord,logDepth,UNITY_MATRIX_I_VP);
-                // float3 worldPos = ComputeWorldSpacePosition(IN.texcoord,depth,UNITY_MATRIX_I_VP);
 
                 float3 entryPoint = _WorldSpaceCameraPos;
                 float3 viewDir = worldPos - _WorldSpaceCameraPos;
@@ -82,7 +73,6 @@ Shader "Tutorial/VolumetricFog"
                     {
                         Light mainLight = GetMainLight(TransformWorldToShadowCoord(rayPos));
                         fogCol.rgb += mainLight.color.rgb * _LightContribution.rgb  * density * mainLight.shadowAttenuation * _StepSize;
-                        // fogCol.rgb += mainLight.color.rgb * _LightContribution.rgb * henyey_greenstein(dot(rayDir, mainLight.direction), _LightScattering) * density * mainLight.shadowAttenuation * _StepSize;
                         transmittance *= exp(-density*_StepSize);
                     }
                     distTravelled += _StepSize;
